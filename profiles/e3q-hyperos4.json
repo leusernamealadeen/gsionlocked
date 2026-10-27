@@ -1,0 +1,39 @@
+{
+  "schema": 1,
+  "id": "e3q-hyperos4-s24-ultra",
+  "model": "SM-S928B",
+  "device": "e3q",
+  "soc": "SM8650",
+  "host_sdk": 37,
+  "host_services_sha256": "665a78975a3c63668e308ba3dc64c1f4e37eeaf4f271af2ff97db7b6aafba7f2",
+  "host_framework_sha256": "4e2eaa64e3b5786a3680b4167d1a39fbfbca4675d15e132fe167b9015718cb60",
+  "host_service_art_sha256": "4e1229e8582ea6f03d7f9264fa07a3f3bef02e2ffd74d6ab93a4df16ae19c66c",
+  "host_build": "S928BXXU6EZIF",
+  "gsi": {
+    "name": "HyperOS 4.0 / Android 17 (QCPECN)",
+    "file": "hyperosS24Ultra.img",
+    "sha256": "ba016df72abf030c9e1d4d993a1aef23f6c4923538dd89e3de71c401b634518b",
+    "bytes": 6392864768,
+    "format": "raw-ext4",
+    "sdk": 37,
+    "abi": "arm64-v8a",
+    "build": "17OS4.0.260809.221254686.QCPECN.S",
+    "components_sha256": {
+      "framework.jar": "ab30b2c82d158e18fa83efb02ce32ba838456832708d2e4e4a26a1fbfecc3bbc",
+      "services.jar": "aa7d24693e020be46ab62bdca292068af7f02a4969478e79be836ddb436dc5d9",
+      "service-art.jar": "8cfcac48fe06c48aea7a020c145ce5a3cc0f10d22a67e8573fe3907a6ae28ab4",
+      "vold": "4cb996f798b025a9f4162f209fdb0e1fb124f5e008a68844e680cb9251c20480",
+      "service.incremental.so": "57b40b4cef0c32b56447fba4b266b26fde435d6782329fd2f4dad7cf56b8be8e"
+    }
+  },
+  "state": "inputs-and-art-candidate-prepared-framework-runtime-not-built-or-boot-validated",
+  "launch_enabled": false,
+  "credentials_and_biometrics": "unsupported",
+  "runtime": {
+    "bootstrap": "framework-and-stage-not-built",
+    "return_mode": "unknown",
+    "guest_apex_payloads_prepared": 34,
+    "host_installd_methods_derived": 85,
+    "service_art_candidate_sha256": "329be51948fc18e45836082dee830d08fe079b032a1a1292d6928c69e6ef45ab"
+  }
+}

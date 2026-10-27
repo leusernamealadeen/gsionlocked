@@ -8,8 +8,8 @@ import argparse,copy,hashlib,json,os,re,subprocess,sys,zipfile
 from dynamic_installd_dispatch import patch as dynamic_patch
 
 ROOT=Path(__file__).resolve().parents[1]
-PINS={'services':'242ae9bd14b90961d2aab1b7f12780630112a3fe16394040a546de61d95d544d',
-      'framework':'f8af87fa975ca7e529aeeeb193a4e77bea650b0e9b611259e600c248ac3b4bc4'}
+PINS_DEFAULT={'services':'242ae9bd14b90961d2aab1b7f12780630112a3fe16394040a546de61d95d544d',
+              'framework':'f8af87fa975ca7e529aeeeb193a4e77bea650b0e9b611259e600c248ac3b4bc4'}
 PATCHES=['guest_no_vold_keys','skip_host_apex_services','guest_power_guards','guest_storage_guards',
          'guest_installd_abi','guest_no_sysrq_crash','guest_no_weaver','guest_no_biometric_cleanup',
          'guest_no_gatekeeper','guest_pdb_readonly','guest_no_apex_installs','guest_app_id_offset',
@@ -24,11 +24,17 @@ def sha(path):
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     for name in ('inputs','host-table','apktool','sdk','java-home','output'):p.add_argument('--'+name,type=Path,required=True)
+    p.add_argument('--services-sha256',default=PINS_DEFAULT['services'])
+    p.add_argument('--framework-sha256',default=PINS_DEFAULT['framework'])
+    p.add_argument('--jobs',type=int,default=4,help='Apktool decode workers (1-8)')
     p.add_argument('--prepared-trees',type=Path,help='Reuse explicitly prepatched services/framework trees; records reuse, not a clean patch execution')
     p.add_argument('--only-services',action='store_true',help='Rebuild services only; retain a separately verified framework candidate')
-    a=p.parse_args();sources={name:a.inputs/('system-framework-'+name+'.jar') for name in PINS}
+    a=p.parse_args();pins={'services':a.services_sha256,'framework':a.framework_sha256}
+    if any(not re.fullmatch('[a-f0-9]{64}',value) for value in pins.values()):p.error('Expected SHA-256 source pins')
+    if not 1<=a.jobs<=8:p.error('Apktool jobs must be between 1 and 8')
+    sources={name:a.inputs/('system-framework-'+name+'.jar') for name in pins}
     for name,path in sources.items():
-        if sha(path)!=PINS[name]:p.error('Not the inspected HyperOS '+name+' JAR')
+        if sha(path)!=pins[name]:p.error('Not the inspected HyperOS '+name+' JAR')
     if a.output.exists():p.error('Existing output is preserved')
     a.output.mkdir(parents=True);out=a.output.resolve();sdk=a.sdk.resolve();apktool=a.apktool.resolve()
     exe='.exe' if os.name=='nt' else '';java=a.java_home.resolve()/'bin'/('java'+exe);javac=java.with_name('javac'+exe)
@@ -41,10 +47,10 @@ def main():
         print(script.name+': '+str(result.returncode),flush=True)
         if result.returncode:raise RuntimeError(result.stderr)
     if a.prepared_trees:
-        trees={name:(a.prepared_trees/name).resolve() for name in PINS}
+        trees={name:(a.prepared_trees/name).resolve() for name in pins}
     else:
-        trees={name:out/name for name in PINS}
-        for name in PINS:run(java,'-jar',apktool,'d','-f','-r','-o',trees[name],sources[name].resolve())
+        trees={name:out/name for name in pins}
+        for name in pins:run(java,'-jar',apktool,'d','-f','-r','-j',str(a.jobs),'-o',trees[name],sources[name].resolve())
         patch(ROOT/'tools/hyperos_no_xspace_repair.py',trees['services'])
         patch(ROOT/'tools/hyperos_guest_lock_stub.py',trees['services'])
         for name in PATCHES:
@@ -93,7 +99,7 @@ def main():
         align=sdk/'build-tools/35.0.0'/('zipalign'+exe)
         run(align,'-f','4',raw,target);run(align,'-c','4',target)
         artifacts[target.name]={'sha256':sha(target),'bytes':target.stat().st_size,'replaced_dex':list(replaced)}
-    report={'state':'framework-candidate-only-not-launchable','artifacts':artifacts,'source_sha256':PINS,
+    report={'state':'framework-candidate-only-not-launchable','artifacts':artifacts,'source_sha256':pins,
             'host_table_sha256':sha(a.host_table),'reused_prepared_trees':bool(a.prepared_trees),'dynamic_methods_changed_this_run':changed,
             'remaining':['MIUI extension guards and dependencies','native vold / incremental isolation','guest ART and other module compatibility','HyperOS runtime stage and app profile','device launch and return validation']}
     (out/'result.json').write_text(json.dumps(report,indent=2)+'\n');print(json.dumps(report,indent=2))

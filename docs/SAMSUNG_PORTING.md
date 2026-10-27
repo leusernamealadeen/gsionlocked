@@ -35,7 +35,7 @@ model + codename + SoC из OneOS; одно имя модели недостат
 | --- | --- | --- | --- |
 | S23 | dm1q | SM8550 | Существующий локальный порт SM-S911B/FZG1 Android 16; новый установщик проверен только офлайн |
 | S23+ | dm2q | SM8550 | Только справочный профиль, runtime не собран |
-| S24 Ultra | e3q | SM8650 | Только справочный профиль, runtime не собран |
+| S24 Ultra | e3q | SM8650 | HyperOS 4.0 / Android 17 образ определён; 34 APEX подготовлены, runtime не собран, запуск отключён |
 | S25 / S25+ / S25 Ultra | pa1q / pa2q / pa3q | SM8750 | Только справочные профили, runtime не собран |
 | S26 / S26 docomo / S26+ / S26 Ultra | m1q / m1q / m2q / m3q | SM8850 | Только справочные профили, runtime не собран |
 | Z Fold7 / Z Fold8 / Z Fold8 Ultra | q7q / h8q / q8q | SM8750 / SM8850 / SM8850 | Только справочные профили, runtime не собран |
@@ -89,6 +89,16 @@ python tools/test.py
 выдают разрешение на запуск.
 
 ## English
+
+The S24 Ultra image identity is recorded separately in
+[`profiles/e3q-hyperos4.json`](../profiles/e3q-hyperos4.json): model SM-S928B,
+host SDK 37 / build S928BXXU6EZIF, and raw `hyperosS24Ultra.img` SHA-256
+`ba016df72abf030c9e1d4d993a1aef23f6c4923538dd89e3de71c401b634518b`
+(6,392,864,768 bytes). Read-only inspection identifies the guest build as
+HyperOS 4.0 / Android 17, SDK 37 (`17OS4.0.260809.221254686.QCPECN.S`); 34
+guest APEX payloads and an exact-host/guest ART adapter candidate have been
+prepared locally. The profile remains disabled: the e3q framework/runtime has
+not been built or boot-validated.
 
 **Samsung phones only.** The app and ColorOS root wrapper reject other vendors.
 The new Compatibility screen recognizes 13 upstream model/device/SoC tuples and
